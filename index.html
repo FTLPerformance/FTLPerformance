@@ -718,6 +718,7 @@ en:{
       coachInfo=`Already has a coach for: ${f.coachPijler}. Existing schedule: ${det.join(' | ')}. Build around this — complement, don't overlap.`;
     }
     return`You are Dries, an experienced hybrid coach at FTL Performance.
+IMPORTANT: Write ALL content in ENGLISH. Every description, every tip, every sentence must be in English. Never use Dutch.
 Generate a personalised weekly training plan (week 1) based on:
 - Name: ${f.naam||'Client'}, Age: ${f.leeftijd}${f.gewicht?', Weight: '+f.gewicht+'kg':''}${f.grootte?', Height: '+f.grootte+'cm':''}
 - Work: ${f.job}, Home: ${f.thuis}
@@ -764,7 +765,7 @@ function applyLang(){
   const ids={
     'h-sub':'hSub','coach-title-txt':'coachTitle',
     's1-num':'s1Num','s2-num':'s2Num','s3-num':'s3Num',
-    's1-l1':'s1l1','s1-l2':'s1l2','s2-l1':'s2l1','s2-l2':'s2l2','s2-l3':'s2l3','s2-l4':'s2l4',
+    's1-sub':'s1Sub','s2-sub':'s2Sub','s3-sub':'s3Sub','s1-l1':'s1l1','s1-l2':'s1l2','s2-l1':'s2l1','s2-l2':'s2l2','s2-l3':'s2l3','s2-l4':'s2l4',
     's3-l1':'s3l1','s3-l2':'s3l2',
     'lbl-naam':'lNaam','lbl-job':'lJob','lbl-thuis':'lThuis',
     'lbl-loop':'lLoop','lbl-kracht':'lKracht','lbl-dagen':'lDagen','lbl-sessie':'lSessie','lbl-uit':'lUit',
