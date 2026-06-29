@@ -69,7 +69,7 @@ body{background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(-
 /* RESULT */
 .result-name{font-size:22px;font-weight:700;letter-spacing:-0.02em;margin-bottom:5px}
 .result-name em{color:var(--accent);font-style:normal}
-.result-sum{color:var(--muted);font-size:13px;line-height:1.65;margin-bottom:16px;padding:12px 14px;background:var(--card);border-radius:10px;border-left:3px solid var(--accent)}
+.result-sum{color:var(--muted);font-size:13px;line-height:1.65;margin-bottom:16px;padding:12px 14px;background:var(--card);border-radius:10px;border-left:3px solid var(--accent);overflow-wrap:break-word;word-break:break-word}
 .day-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px;border-left:3px solid var(--border)}
 .day-top{display:flex;justify-content:space-between;align-items:flex-start}
 .day-left{display:flex;align-items:center;gap:10px}
@@ -79,13 +79,15 @@ body{background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(-
 .day-right{text-align:right;flex-shrink:0;margin-left:12px}
 .day-int{font-size:11px;font-weight:600}
 .day-dur{font-size:11px;color:var(--muted);margin-top:1px}
-.day-items{border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;flex-direction:column;gap:5px}
-.day-item{font-size:12px;color:#CCC;display:flex;gap:8px;line-height:1.45}
+.day-items{border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.day-item{font-size:12px;color:#CCC;display:flex;gap:8px;line-height:1.45;overflow-wrap:break-word;word-break:break-word;min-width:0}
 .dash{color:var(--accent);flex-shrink:0;font-weight:700}
+.day-item span:last-child{min-width:0;overflow-wrap:break-word}
 .rpe-badge{display:inline-block;background:rgba(200,240,74,0.1);border:1px solid rgba(200,240,74,0.25);border-radius:4px;padding:1px 6px;font-size:11px;color:var(--accent);font-weight:600;margin-left:4px}
 .tips{background:#111A06;border:1px solid rgba(200,240,74,0.15);border-radius:12px;padding:16px 18px;margin-top:8px}
 .tips-label{font-size:10px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:12px}
-.tip{font-size:13px;color:#CCC;display:flex;gap:10px;margin-bottom:8px;line-height:1.5}
+.tip{font-size:13px;color:#CCC;display:flex;gap:10px;margin-bottom:8px;line-height:1.5;overflow-wrap:break-word;word-break:break-word}
+.tip span:last-child{min-width:0;overflow-wrap:break-word}
 .tip-n{color:var(--accent);font-weight:700;flex-shrink:0;min-width:16px}
 /* RPE LEGENDA */
 .rpe-legend{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:8px}
@@ -186,10 +188,10 @@ body{background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(-
   /* Result cards */
   .result-name{font-size:18px}
   .result-sum{font-size:12px;padding:10px 12px;line-height:1.6}
-  .day-card{padding:12px 14px;border-radius:10px;margin-bottom:6px}
+  .day-card{padding:12px 14px;border-radius:10px;margin-bottom:6px;overflow:hidden;word-break:break-word}
   .day-name{font-size:13px}
   .day-stitle{font-size:11px}
-  .day-item{font-size:11px;line-height:1.5;gap:6px}
+  .day-item{font-size:11px;line-height:1.5;gap:6px;overflow-wrap:break-word;word-break:break-word}
   .day-icon{font-size:16px}
   .day-top{gap:6px}
   .day-right{margin-left:8px}
@@ -425,6 +427,19 @@ body{background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(-
           <option value="buiten en gym" id="o-ub">Buiten + gym</option>
         </select>
       </div>
+      <div class="field full">
+        <label id="lbl-nietbeschikbaar">Op welke dagen kan je NIET trainen?</label>
+        <span class="hint-text" id="hint-nietbeschikbaar">Selecteer de dagen waarop je zeker niet beschikbaar bent</span>
+        <div class="day-picker" id="niet-beschikbaar" style="margin-top:6px">
+          <button type="button" class="day-pill" data-day="Ma" onclick="toggleDay(this)">Ma</button>
+          <button type="button" class="day-pill" data-day="Di" onclick="toggleDay(this)">Di</button>
+          <button type="button" class="day-pill" data-day="Wo" onclick="toggleDay(this)">Wo</button>
+          <button type="button" class="day-pill" data-day="Do" onclick="toggleDay(this)">Do</button>
+          <button type="button" class="day-pill" data-day="Vr" onclick="toggleDay(this)">Vr</button>
+          <button type="button" class="day-pill" data-day="Za" onclick="toggleDay(this)">Za</button>
+          <button type="button" class="day-pill" data-day="Zo" onclick="toggleDay(this)">Zo</button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="section">
@@ -586,7 +601,7 @@ nl:{
   s3l1:'Doelstelling',s3l2:'Gezondheid & blessures',
   lNaam:'Naam',lLeeftijd:'Leeftijd',lGewicht:'Gewicht (kg)',lGrootte:'Grootte (cm)',lJob:'Jobsituatie',lThuis:'Thuissituatie',
   lLoop:'Loopniveau',lKracht:'Krachtniveau',lDagen:'Dagen per week',lSessie:'Tijd per sessie',lUit:'Beschikbare uitrusting',
-  lSport:'Sporten die je deed of doet',lCoachQ:'Werk je al samen met een coach voor lopen of kracht?',lCoachPijler:'Voor welke pijler?',
+  lSport:'Sporten die je deed of doet',lNietBeschikbaar:'Op welke dagen kan je NIET trainen?',hintNietBeschikbaar:'Selecteer de dagen waarop je zeker niet beschikbaar bent',lCoachQ:'Werk je al samen met een coach voor lopen of kracht?',lCoachPijler:'Voor welke pijler?',
   lLoopFreq:'Hoe vaak per week loop je?',lLoopDagen:'Op welke dagen?',lKrachtFreq:'Hoe vaak per week train je kracht?',lKrachtDagen:'Op welke dagen?',
   lDoel:'Hoofddoel',lTermijn:'Termijn',lSpecDoel:'Specifiek doel',lBles:'Blessures, pijn of medische aandoeningen',
   opt:'optioneel',hintGew:'Helpt bij belastingberekening — niet verplicht',hintGrt:'Samen met gewicht voor betere inschatting',
@@ -643,6 +658,7 @@ Genereer een gepersonaliseerd weekschema (week 1) op basis van:
 - Sportachtergrond: ${f.sport||'niet opgegeven'}
 - ${coachInfo}
 - Doel: ${f.doel}, Termijn: ${f.termijn}${f.specdoel?', Specifiek: '+f.specdoel:''}
+- Niet beschikbaar op: ${f.nietBeschikbaar||'geen voorkeur'}
 - Blessures: ${f.blessures||'geen'}
 
 KRITIEKE REGELS:
@@ -669,7 +685,7 @@ en:{
   s3l1:'Goal',s3l2:'Health & injuries',
   lNaam:'Name',lLeeftijd:'Age',lGewicht:'Weight (kg)',lGrootte:'Height (cm)',lJob:'Work situation',lThuis:'Home situation',
   lLoop:'Running level',lKracht:'Strength level',lDagen:'Days per week',lSessie:'Time per session',lUit:'Available equipment',
-  lSport:'Sports you do or have done',lCoachQ:'Are you already working with a coach for running or strength?',lCoachPijler:'For which discipline?',
+  lSport:'Sports you do or have done',lNietBeschikbaar:'Which days can you NOT train?',hintNietBeschikbaar:'Select the days you are definitely not available',lCoachQ:'Are you already working with a coach for running or strength?',lCoachPijler:'For which discipline?',
   lLoopFreq:'How many times per week do you run?',lLoopDagen:'On which days?',lKrachtFreq:'How many times per week do you train strength?',lKrachtDagen:'On which days?',
   lDoel:'Main goal',lTermijn:'Timeline',lSpecDoel:'Specific goal',lBles:'Injuries, pain or medical conditions',
   opt:'optional',hintGew:'Helps with load calculation — not required',hintGrt:'Together with weight for better estimation',
@@ -727,6 +743,7 @@ Generate a personalised weekly training plan (week 1) based on:
 - Sports background: ${f.sport||'not provided'}
 - ${coachInfo}
 - Goal: ${f.doel}, Timeline: ${f.termijn}${f.specdoel?', Specific: '+f.specdoel:''}
+- NOT available on: ${f.nietBeschikbaar||'no preference'}
 - Injuries: ${f.blessures||'none'}
 
 CRITICAL RULES:
@@ -754,7 +771,7 @@ function setLang(l,btn){
 
 function updateDayLabels(){
   const d=days[lang];
-  ['loop-dagen','kracht-dagen'].forEach(id=>{
+  ['loop-dagen','kracht-dagen','niet-beschikbaar'].forEach(id=>{
     const pills=document.querySelectorAll('#'+id+' .day-pill');
     pills.forEach((p,i)=>{ p.dataset.day=d[i]; p.textContent=d[i]; });
   });
@@ -769,7 +786,7 @@ function applyLang(){
     's3-l1':'s3l1','s3-l2':'s3l2',
     'lbl-naam':'lNaam','lbl-job':'lJob','lbl-thuis':'lThuis',
     'lbl-loop':'lLoop','lbl-kracht':'lKracht','lbl-dagen':'lDagen','lbl-sessie':'lSessie','lbl-uit':'lUit',
-    'lbl-sport':'lSport','lbl-coach-q':'lCoachQ','lbl-coach-pijler':'lCoachPijler',
+    'lbl-sport':'lSport','lbl-nietbeschikbaar':'lNietBeschikbaar','hint-nietbeschikbaar':'hintNietBeschikbaar','lbl-coach-q':'lCoachQ','lbl-coach-pijler':'lCoachPijler',
     'lbl-loop-freq':'lLoopFreq','lbl-loop-dagen':'lLoopDagen',
     'lbl-kracht-freq':'lKrachtFreq','lbl-kracht-dagen':'lKrachtDagen',
     'lbl-doel':'lDoel','lbl-termijn':'lTermijn','lbl-specdoel':'lSpecDoel','lbl-bles':'lBles',
@@ -886,6 +903,7 @@ async function genereer(){
     loopDagen:getSelectedDays('loop-dagen'),
     krachtFreq:(document.getElementById('kracht-freq')||{}).value||'',
     krachtDagen:getSelectedDays('kracht-dagen'),
+    nietBeschikbaar:getSelectedDays('niet-beschikbaar'),
     doel:document.getElementById('doel').value,
     termijn:document.getElementById('termijn').value,
     specdoel:document.getElementById('specdoel').value,
