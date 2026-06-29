@@ -737,7 +737,7 @@ CRITICAL RULES:
 6. TIPS: tips 1-3 are coaching tips. Tip 4 = what to do if you miss a session. Tip 5 = gentle hint that a personal coach helps with technique and progression — friendly, not pushy.
 7. PROGRESSION: add a "progressie" field with 2-3 sentences on how to adapt this plan in weeks 2-3.${f.specdoel?'\n8. Align the plan with the specific goal: '+f.specdoel:''}
 
-Reply ONLY as JSON without markdown, use English day names. IMPORTANT: do NOT use apostrophes (') in any text values, write in full (you can -> you can, don't -> do not). No special quote characters.
+Reply ONLY as JSON without markdown. ALL text values MUST be in English. Use English day names (Monday, Tuesday...), English exercise names, English descriptions. Do not use any Dutch. IMPORTANT: do NOT use apostrophes (') in any text values, write in full (you can -> you can, don't -> do not). No special quote characters.
 {"samenvatting":"2-3 sentences","weekschema":[{"dag":"Monday","type":"Strength","titel":"short title","duur":"45 min","inhoud":["exercise with beginner cue or RPE for runners"],"intensiteit":"Moderate"}],"tips":["tip1","tip2","tip3","missed session tip","coaching hint"],"progressie":"how to adapt in weeks 2-3"}`;
   }
 }
@@ -918,7 +918,7 @@ async function genereer(){
       body:JSON.stringify({
         model:'claude-sonnet-4-6',
         max_tokens:4096,
-        system:'You are a JSON API. Return ONLY valid JSON. No markdown fences, no explanation. Just the raw JSON object.',
+        system:lang==='nl'?'Je bent een JSON API. Geef ALLEEN valide JSON terug. Geen markdown, geen uitleg. Alleen het JSON object. Alle tekst in het Nederlands.':'You are a JSON API. Return ONLY valid JSON. No markdown fences, no explanation. Just the raw JSON object. ALL text values must be in English.',
         messages:[{role:'user',content:t.prompt(f)}]
       })
     });
