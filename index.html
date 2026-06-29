@@ -148,43 +148,103 @@ body{background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(-
 
 /* MOBILE */
 @media(max-width:600px){
+  /* Header */
   .header{flex-wrap:wrap;gap:8px;padding:12px 16px}
-  .coach-intro{margin-left:0;padding-left:0;border-left:none;order:3;width:100%;display:none}
+  .coach-intro{display:none}
   .lang-toggle{margin-left:auto}
   .logo{font-size:15px}
   .logo-sub{font-size:9px}
+  /* Layout */
   .wrap{padding:20px 16px 40px}
+  .progress-wrap{padding:14px 16px 0}
+  /* Step hero */
+  .step-hero{margin-bottom:20px}
   .step-hero h1{font-size:19px}
   .step-hero p{font-size:12px}
-  .section{padding:16px}
+  .step-num{font-size:10px}
+  /* Sections */
+  .section{padding:14px;margin-bottom:8px;border-radius:12px}
   .section-label{font-size:9px;margin-bottom:10px}
-  .field input,.field select,.field textarea{font-size:16px;padding:10px}
+  /* Form fields - 16px prevents iOS auto-zoom */
+  .field input,.field select,.field textarea{font-size:16px;padding:11px 12px;border-radius:8px}
   .field label{font-size:10px}
-  .btn-next{font-size:14px;padding:14px}
-  .btn-back-step{padding:14px 14px;font-size:13px}
-  .btn-row{gap:8px}
-  .progress-wrap{padding:14px 16px 0}
+  .field textarea{min-height:80px}
+  .hint-text{font-size:10px}
+  .opt-tag{font-size:9px}
+  /* Buttons */
+  .btn-next{font-size:14px;padding:15px;border-radius:12px}
+  .btn-back-step{padding:15px 14px;font-size:13px;border-radius:12px}
+  .btn-row{gap:8px;margin-top:16px}
+  /* Coach toggle */
+  .toggle-row{gap:6px}
+  .toggle-btn{font-size:13px;padding:10px;border-radius:8px}
+  .coach-sub{padding:12px;margin-top:8px}
+  .coach-detail-block{padding:10px}
+  /* Day picker - larger touch targets */
+  .day-picker{gap:5px}
+  .day-pill{padding:7px 12px;font-size:12px;border-radius:16px}
+  /* Result cards */
   .result-name{font-size:18px}
-  .result-sum{font-size:12px;padding:10px 12px}
-  .day-card{padding:12px 14px}
+  .result-sum{font-size:12px;padding:10px 12px;line-height:1.6}
+  .day-card{padding:12px 14px;border-radius:10px;margin-bottom:6px}
   .day-name{font-size:13px}
   .day-stitle{font-size:11px}
-  .day-item{font-size:11px}
+  .day-item{font-size:11px;line-height:1.5;gap:6px}
   .day-icon{font-size:16px}
-  .tips{padding:14px 16px}
-  .tip{font-size:12px}
-  .rpe-legend{padding:12px 14px}
-  .rpe-rows{grid-template-columns:1fr}
-  .cta-block{padding:16px}
+  .day-top{gap:6px}
+  .day-right{margin-left:8px}
+  .day-int{font-size:10px}
+  .day-dur{font-size:10px}
+  /* Tips */
+  .tips{padding:14px 16px;border-radius:10px}
+  .tip{font-size:12px;line-height:1.5;gap:8px;margin-bottom:6px}
+  .tips-label{font-size:9px;margin-bottom:10px}
+  /* RPE legend */
+  .rpe-legend{padding:12px 14px;border-radius:10px}
+  .rpe-rows{grid-template-columns:1fr;gap:4px}
+  .rpe-row{font-size:10px}
+  .rpe-num{font-size:11px;min-width:20px}
+  .rpe-legend-title{font-size:9px}
+  /* Progressie */
+  .progress-note{padding:12px 14px;border-radius:10px}
+  .progress-note-title{font-size:9px}
+  .progress-note-text{font-size:12px}
+  /* CTA */
+  .cta-block{padding:16px;border-radius:12px}
   .cta-title{font-size:14px}
-  .cta-sub{font-size:12px}
-  .action-row{flex-direction:column}
-  .btn-download,.btn-restart{min-width:100%}
-  .modal-box{padding:20px 18px;margin:10px}
-  .day-picker{gap:4px}
-  .day-pill{padding:5px 9px;font-size:11px}
-  .toggle-row{gap:6px}
-  .toggle-btn{font-size:12px;padding:8px}
+  .cta-sub{font-size:12px;margin-bottom:12px}
+  .cta-btns{flex-direction:column;gap:6px}
+  .cta-btn-main,.cta-btn-sec{width:100%;text-align:center;padding:12px 16px;font-size:13px;border-radius:10px}
+  /* Action buttons */
+  .action-row{flex-direction:column;gap:6px;margin-top:10px}
+  .btn-download,.btn-restart{min-width:100%;padding:13px;border-radius:10px}
+  /* Contact modal */
+  .modal-overlay{padding:12px}
+  .modal-box{padding:20px 16px;border-radius:14px;max-height:90vh;overflow-y:auto}
+  .modal-title{font-size:16px}
+  .modal-sub{font-size:12px}
+  .modal-field input,.modal-field textarea{font-size:16px;padding:11px 12px}
+  .modal-field label{font-size:10px}
+  .modal-send{padding:14px;font-size:14px;border-radius:10px}
+  /* Loading overlay */
+  .loading-overlay{padding:24px}
+  .loading-msg{font-size:14px;padding:0 16px}
+  .loading-sub{font-size:11px}
+  .loading-spinner{width:36px;height:36px}
+  /* Footer */
+  .footer-note{font-size:10px;margin-top:12px}
+}
+/* Extra small screens */
+@media(max-width:380px){
+  .header{padding:10px 12px}
+  .logo{font-size:14px}
+  .wrap{padding:16px 12px 36px}
+  .section{padding:12px}
+  .step-hero h1{font-size:17px}
+  .btn-next{font-size:13px;padding:14px}
+  .day-pill{padding:6px 10px;font-size:11px}
+  .day-card{padding:10px 12px}
+  .modal-box{padding:16px 14px}
 }
 
 /* LOADING OVERLAY */
