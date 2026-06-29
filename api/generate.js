@@ -5,7 +5,7 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'API key not configured' });
+    return res.status(500).json({ error: 'No API key found' });
   }
 
   try {
@@ -22,6 +22,6 @@ export default async function handler(req, res) {
     const data = await response.json();
     return res.status(response.status).json(data);
   } catch (err) {
-    return res.status(500).json({ error: 'Failed to generate schema' });
+    return res.status(500).json({ error: err.message || 'Unknown error' });
   }
 }
