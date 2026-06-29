@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FTL Performance — Schema Generator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--accent:#C8F04A;--dark:#0F0F0F;--card:#161616;--input:#1E1E1E;--border:#2A2A2A;--text:#F0F0F0;--muted:#888;--error:#FF5C5C;--success:#5CE0C8}
+body{background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(--text);min-height:100vh}
+.header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center}
+.logo{font-size:17px;font-weight:800;letter-spacing:-0.04em}
+.logo em{color:var(--accent);font-style:normal}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px}
+.coach-intro{display:flex;align-items:center;gap:10px;margin-left:20px;padding-left:20px;border-left:1px solid var(--border)}
+.coach-avatar{width:32px;height:32px;border-radius:50%;background:rgba(200,240,74,0.15);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--accent);flex-shrink:0}
+.coach-name{font-size:12px;font-weight:600;color:var(--text)}
+.coach-title{font-size:10px;color:var(--muted)}
+.lang-toggle{margin-left:auto;display:flex;gap:3px;background:var(--input);border-radius:8px;padding:3px}
+.lang-btn{padding:5px 13px;border-radius:6px;border:none;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:all 0.15s}
+.lang-btn.active{background:var(--accent);color:var(--dark)}
+.progress-wrap{padding:20px 24px 0;max-width:680px;margin:0 auto}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.progress-label{font-size:12px;color:var(--muted)}
+.progress-label em{color:var(--text);font-style:normal;font-weight:500}
+.progress-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.4s ease}
+.step-dots{display:flex;gap:6px;margin-top:10px}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all 0.3s}
+.step-dot.done{background:var(--accent)}
+.step-dot.active{background:var(--accent);transform:scale(1.4)}
+.wrap{max-width:680px;margin:0 auto;padding:28px 24px 48px}
+.step-hero{margin-bottom:28px}
+.step-num{font-size:11px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
+.step-hero h1{font-size:22px;font-weight:700;line-height:1.25;letter-spacing:-0.02em}
+.step-hero h1 em{color:var(--accent);font-style:normal}
+.step-hero p{color:var(--muted);margin-top:6px;font-size:13px;line-height:1.6}
+.section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:10px}
+.section-label{font-size:10px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+.grid.single{grid-template-columns:1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:500}
+.opt-tag{font-size:10px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px;opacity:0.7}
+.field input,.field select,.field textarea{background:var(--input);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:14px;font-family:inherit;outline:none;width:100%;transition:border-color 0.15s;resize:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#444}
+.field select{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.hint-text{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+.full{grid-column:1/-1}
+.toggle-row{display:flex;gap:8px}
+.toggle-btn{flex:1;padding:9px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;transition:all 0.15s;text-align:center}
+.toggle-btn.sel{border-color:var(--accent);background:rgba(200,240,74,0.08);color:var(--accent)}
+.coach-sub{margin-top:10px;padding:14px;background:var(--input);border-radius:10px;border:1px solid var(--border)}
+.coach-sub>label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:500;display:block;margin-bottom:8px}
+.coach-sub select{background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px;font-size:13px;font-family:inherit;outline:none;width:100%;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer}
+.coach-detail{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.coach-detail-block{background:var(--card);border-radius:8px;padding:12px;border:1px solid var(--border)}
+.coach-detail-block>label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:500;display:block;margin-bottom:8px}
+.coach-detail-block select{background:var(--input);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px;font-size:13px;font-family:inherit;outline:none;width:100%;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer;margin-bottom:10px}
+.day-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.day-pill{padding:6px 11px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:all 0.15s}
+.day-pill.sel{border-color:var(--accent);background:rgba(200,240,74,0.1);color:var(--accent)}
+.btn-row{display:flex;gap:10px;margin-top:20px}
+.btn-next{flex:1;padding:13px;background:var(--accent);color:var(--dark);border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-next:hover{opacity:0.9}
+.btn-back-step{padding:13px 18px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:14px;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.btn-back-step:hover{border-color:#444;color:var(--text)}
+/* RESULT */
+.result-name{font-size:22px;font-weight:700;letter-spacing:-0.02em;margin-bottom:5px}
+.result-name em{color:var(--accent);font-style:normal}
+.result-sum{color:var(--muted);font-size:13px;line-height:1.65;margin-bottom:16px;padding:12px 14px;background:var(--card);border-radius:10px;border-left:3px solid var(--accent)}
+.day-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px;border-left:3px solid var(--border)}
+.day-top{display:flex;justify-content:space-between;align-items:flex-start}
+.day-left{display:flex;align-items:center;gap:10px}
+.day-icon{font-size:18px;flex-shrink:0}
+.day-name{font-weight:600;font-size:14px}
+.day-stitle{font-size:12px;color:var(--muted);margin-top:1px}
+.day-right{text-align:right;flex-shrink:0;margin-left:12px}
+.day-int{font-size:11px;font-weight:600}
+.day-dur{font-size:11px;color:var(--muted);margin-top:1px}
+.day-items{border-top:1px solid var(--border);margin-top:10px;padding-top:10px;display:flex;flex-direction:column;gap:5px}
+.day-item{font-size:12px;color:#CCC;display:flex;gap:8px;line-height:1.45}
+.dash{color:var(--accent);flex-shrink:0;font-weight:700}
+.rpe-badge{display:inline-block;background:rgba(200,240,74,0.1);border:1px solid rgba(200,240,74,0.25);border-radius:4px;padding:1px 6px;font-size:11px;color:var(--accent);font-weight:600;margin-left:4px}
+.tips{background:#111A06;border:1px solid rgba(200,240,74,0.15);border-radius:12px;padding:16px 18px;margin-top:8px}
+.tips-label{font-size:10px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:12px}
+.tip{font-size:13px;color:#CCC;display:flex;gap:10px;margin-bottom:8px;line-height:1.5}
+.tip-n{color:var(--accent);font-weight:700;flex-shrink:0;min-width:16px}
+/* RPE LEGENDA */
+.rpe-legend{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:8px}
+.rpe-legend-title{font-size:10px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:10px}
+.rpe-rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:6px}
+.rpe-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.rpe-num{font-weight:700;color:var(--text);min-width:24px;font-size:12px}
+/* PROGRESSIE */
+.progress-note{background:#0D1A0D;border:1px solid rgba(200,240,74,0.2);border-radius:12px;padding:14px 16px;margin-top:8px}
+.progress-note-title{font-size:10px;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px}
+.progress-note-text{font-size:13px;color:#CCC;line-height:1.55}
+/* CTA */
+.cta-block{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-top:16px;text-align:center}
+.cta-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+.cta-sub{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.cta-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.cta-btn-main{padding:10px 20px;background:var(--accent);color:var(--dark);border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+.cta-btn-sec{padding:10px 20px;background:transparent;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;transition:all 0.15s}
+.cta-btn-sec:hover{border-color:#444;color:var(--text)}
+/* DOWNLOAD / PRINT */
+.action-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn-download{flex:1;min-width:140px;padding:11px;background:var(--input);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-download:hover{border-color:#444;background:#252525}
+.btn-restart{flex:1;min-width:140px;padding:11px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.btn-restart:hover{border-color:#444;color:var(--text)}
+.error-box{background:#1A0808;border:1px solid var(--error);border-radius:8px;padding:12px 14px;color:var(--error);font-size:13px;margin-bottom:12px;display:none}
+.footer-note{color:var(--muted);font-size:11px;text-align:center;margin-top:16px}
+.footer-note em{color:var(--accent);font-style:normal}
+#step1,#step2,#step3,#result{display:none}
+
+/* PRINT STYLES */
+@media print{
+  .header{border-bottom:1px solid #ccc;padding:12px 0}
+  .lang-toggle,.progress-wrap,.btn-row,.action-row,.btn-restart,.btn-download,.cta-block{display:none!important}
+  body{background:white;color:black;font-size:12px}
+  .wrap{padding:0}
+  .day-card{background:#f9f9f9;border:1px solid #ddd;margin-bottom:6px;page-break-inside:avoid}
+  .day-name{color:black}
+  .day-stitle,.day-dur,.day-item{color:#444}
+  .result-sum{background:#f5f5f5;border-left:3px solid #333;color:#333}
+  .tips{background:#f0f8e8;border:1px solid #ccc}
+  .tips-label,.tip-n{color:#3a6b0a}
+  .tip{color:#333}
+  .rpe-legend{background:#f9f9f9;border:1px solid #ddd}
+  .rpe-legend-title{color:#3a6b0a}
+  .rpe-num{color:black}
+  .rpe-row{color:#444}
+  .progress-note{background:#f0f8e8;border:1px solid #ccc}
+  .progress-note-title{color:#3a6b0a}
+  .progress-note-text{color:#333}
+  .result-name{color:black}
+  .logo em{color:#3a6b0a}
+  .dash{color:#3a6b0a}
+  .day-int{color:#555!important}
+  .footer-note{color:#888}
+  .footer-note em{color:#3a6b0a}
+  #result{display:block!important}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo">FTL<em>PERFORMANCE</em></div>
+    <div class="logo-sub" id="h-sub">Schema Generator</div>
+  </div>
+  <div class="coach-intro">
+    <div class="coach-avatar">D</div>
+    <div>
+      <div class="coach-name">Dries Vandermeeren</div>
+      <div class="coach-title" id="coach-title-txt">Hybrid Coach · FTL Performance</div>
+    </div>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('nl',this)">NL</button>
+    <button class="lang-btn" onclick="setLang('en',this)">EN</button>
+  </div>
+</div>
+
+<div class="progress-wrap" id="progress-wrap">
+  <div class="progress-top">
+    <span class="progress-label" id="prog-label">Stap <em>1</em> van 3</span>
+    <span class="progress-label" id="prog-time">~2 min</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:33%"></div></div>
+  <div class="step-dots">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- STEP 1 -->
+<div id="step1">
+  <div class="step-hero">
+    <div class="step-num" id="s1-num">Stap 1 van 3</div>
+    <h1 id="s1-title">Vertel me <em>wie je bent</em></h1>
+    <p id="s1-sub">Geen verplichte velden behalve je leeftijd — hoe meer je deelt, hoe beter het schema.</p>
+  </div>
+  <div class="section">
+    <div class="section-label" id="s1-l1">Jouw gegevens</div>
+    <div class="grid">
+      <div class="field"><label id="lbl-naam">Naam</label><input id="naam" placeholder="bijv. Jana"/></div>
+      <div class="field"><label id="lbl-leeftijd">Leeftijd <span style="color:var(--error)">*</span></label><input id="leeftijd" type="number" placeholder="bijv. 28" min="16" max="80"/></div>
+      <div class="field">
+        <label id="lbl-gewicht">Gewicht (kg)<span class="opt-tag" id="opt1">optioneel</span></label>
+        <input id="gewicht" type="number" placeholder="bijv. 75"/>
+        <span class="hint-text" id="hint-gew">Helpt bij belastingberekening — niet verplicht</span>
+      </div>
+      <div class="field">
+        <label id="lbl-grootte">Grootte (cm)<span class="opt-tag" id="opt2">optioneel</span></label>
+        <input id="grootte" type="number" placeholder="bijv. 178"/>
+        <span class="hint-text" id="hint-grt">Samen met gewicht voor betere inschatting</span>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label" id="s1-l2">Jouw situatie</div>
+    <div class="grid single">
+      <div class="field">
+        <label id="lbl-job">Jobsituatie</label>
+        <select id="job">
+          <option value="zittend bureauwerk" id="o-j1">Zittend bureauwerk</option>
+          <option value="fysieke job" id="o-j2">Fysieke job</option>
+          <option value="ploegendienst" id="o-j3">Ploegendienst / onregelmatige uren</option>
+          <option value="thuiswerken" id="o-j4">Voornamelijk thuiswerken</option>
+          <option value="wisselend" id="o-j5">Wisselend</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="lbl-thuis">Thuissituatie</label>
+        <select id="thuis">
+          <option value="alleenwonend" id="o-t1">Alleenwonend</option>
+          <option value="samenwonend zonder kinderen" id="o-t2">Samenwonend, geen kinderen</option>
+          <option value="samenwonend met kinderen" id="o-t3">Samenwonend met kinderen</option>
+          <option value="druk gezinsleven" id="o-t4">Druk gezinsleven</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-next" id="btn1" onclick="goStep(2)">Verder naar mijn training →</button>
+  </div>
+  <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:8px" id="req-note">* Leeftijd is verplicht</p>
+</div>
+
+<!-- STEP 2 -->
+<div id="step2">
+  <div class="step-hero">
+    <div class="step-num" id="s2-num">Stap 2 van 3</div>
+    <h1 id="s2-title">Jouw <em>trainingsachtergrond</em></h1>
+    <p id="s2-sub">Hoe je nu traint bepaalt waar we vertrekken — eerlijk antwoorden geeft het beste schema.</p>
+  </div>
+  <div class="section">
+    <div class="section-label" id="s2-l1">Lopen & Kracht apart</div>
+    <div class="grid">
+      <div class="field">
+        <label id="lbl-loop">Loopniveau</label>
+        <select id="loopniveau">
+          <option value="geen loopervaring" id="o-ln">Geen ervaring</option>
+          <option value="occasioneel onder 5km" id="o-lo">Occasioneel (&lt;5km)</option>
+          <option value="regelmatig 5 tot 10km" id="o-lm">Regelmatig (5–10km)</option>
+          <option value="ervaren meer dan 10km" id="o-lh">Ervaren (10km+)</option>
+          <option value="wedstrijdloper" id="o-lx">Wedstrijdloper</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="lbl-kracht">Krachtniveau</label>
+        <select id="krachtniveau">
+          <option value="geen krachtervaring" id="o-kn">Geen ervaring</option>
+          <option value="basis minder dan 6 maanden" id="o-kb">Basis (&lt;6 maanden)</option>
+          <option value="gemiddeld 6 tot 24 maanden" id="o-km">Gemiddeld (6–24 mnd)</option>
+          <option value="gevorderd meer dan 2 jaar" id="o-ka">Gevorderd (2+ jaar)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label" id="s2-l2">Beschikbaarheid & uitrusting</div>
+    <div class="grid">
+      <div class="field">
+        <label id="lbl-dagen">Dagen per week</label>
+        <select id="dagen">
+          <option value="2">2 dagen</option>
+          <option value="3" selected>3 dagen</option>
+          <option value="4">4 dagen</option>
+          <option value="5">5 dagen</option>
+          <option value="6">6 dagen</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="lbl-sessie">Tijd per sessie</label>
+        <select id="sessie">
+          <option value="30 tot 45 minuten" id="o-s1">30–45 minuten</option>
+          <option value="45 tot 60 minuten" id="o-s2" selected>45–60 minuten</option>
+          <option value="60 tot 90 minuten" id="o-s3">60–90 minuten</option>
+          <option value="meer dan 90 minuten" id="o-s4">90+ minuten</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label id="lbl-uit">Beschikbare uitrusting</label>
+        <select id="uitrusting">
+          <option value="volledige gym" id="o-ug">Volledige gym</option>
+          <option value="thuis zonder materiaal" id="o-u0">Thuis – geen materiaal</option>
+          <option value="thuis met dumbbells" id="o-ud">Thuis – dumbbells</option>
+          <option value="thuis volledig uitgerust" id="o-uf">Thuis – volledig uitgerust</option>
+          <option value="buiten en gym" id="o-ub">Buiten + gym</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label" id="s2-l3">Sportachtergrond</div>
+    <div class="field">
+      <label id="lbl-sport">Sporten die je deed of doet</label>
+      <input id="sportachtergrond" placeholder="bijv. voetbal 10 jaar, yoga, crossfit..."/>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label" id="s2-l4">Reeds een coach?</div>
+    <div class="field">
+      <label id="lbl-coach-q">Werk je al samen met een coach voor lopen of kracht?</label>
+      <div class="toggle-row" style="margin-top:4px">
+        <button type="button" class="toggle-btn sel" id="coach-nee" onclick="setCoach(false)">Nee</button>
+        <button type="button" class="toggle-btn" id="coach-ja" onclick="setCoach(true)">Ja</button>
+      </div>
+      <div class="coach-sub" id="coach-sub" style="display:none">
+        <label id="lbl-coach-pijler">Voor welke pijler?</label>
+        <select id="coach-pijler" onchange="updateCoachDetail()">
+          <option value="lopen" id="o-cp1">Lopen — ik heb al een loopcoach</option>
+          <option value="kracht" id="o-cp2">Kracht — ik heb al een krachtcoach</option>
+          <option value="beide" id="o-cp3">Beide</option>
+        </select>
+        <div class="coach-detail" id="coach-detail" style="display:none">
+          <div class="coach-detail-block" id="loop-detail" style="display:none">
+            <label id="lbl-loop-freq">Hoe vaak per week loop je?</label>
+            <select id="loop-freq">
+              <option value="1x per week">1x per week</option>
+              <option value="2x per week" selected>2x per week</option>
+              <option value="3x per week">3x per week</option>
+              <option value="4x per week">4x per week</option>
+              <option value="5x per week">5x per week</option>
+            </select>
+            <label id="lbl-loop-dagen">Op welke dagen?</label>
+            <div class="day-picker" id="loop-dagen">
+              <button type="button" class="day-pill" data-day="Ma" onclick="toggleDay(this)">Ma</button>
+              <button type="button" class="day-pill" data-day="Di" onclick="toggleDay(this)">Di</button>
+              <button type="button" class="day-pill" data-day="Wo" onclick="toggleDay(this)">Wo</button>
+              <button type="button" class="day-pill" data-day="Do" onclick="toggleDay(this)">Do</button>
+              <button type="button" class="day-pill" data-day="Vr" onclick="toggleDay(this)">Vr</button>
+              <button type="button" class="day-pill" data-day="Za" onclick="toggleDay(this)">Za</button>
+              <button type="button" class="day-pill" data-day="Zo" onclick="toggleDay(this)">Zo</button>
+            </div>
+          </div>
+          <div class="coach-detail-block" id="kracht-detail" style="display:none">
+            <label id="lbl-kracht-freq">Hoe vaak per week train je kracht?</label>
+            <select id="kracht-freq">
+              <option value="1x per week">1x per week</option>
+              <option value="2x per week" selected>2x per week</option>
+              <option value="3x per week">3x per week</option>
+              <option value="4x per week">4x per week</option>
+            </select>
+            <label id="lbl-kracht-dagen">Op welke dagen?</label>
+            <div class="day-picker" id="kracht-dagen">
+              <button type="button" class="day-pill" data-day="Ma" onclick="toggleDay(this)">Ma</button>
+              <button type="button" class="day-pill" data-day="Di" onclick="toggleDay(this)">Di</button>
+              <button type="button" class="day-pill" data-day="Wo" onclick="toggleDay(this)">Wo</button>
+              <button type="button" class="day-pill" data-day="Do" onclick="toggleDay(this)">Do</button>
+              <button type="button" class="day-pill" data-day="Vr" onclick="toggleDay(this)">Vr</button>
+              <button type="button" class="day-pill" data-day="Za" onclick="toggleDay(this)">Za</button>
+              <button type="button" class="day-pill" data-day="Zo" onclick="toggleDay(this)">Zo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-back-step" onclick="goStep(1)" id="back1">← Terug</button>
+    <button class="btn-next" onclick="goStep(3)" id="btn2">Naar mijn doelstelling →</button>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div id="step3">
+  <div class="step-hero">
+    <div class="step-num" id="s3-num">Stap 3 van 3</div>
+    <h1 id="s3-title">Jouw <em>doel</em> & gezondheid</h1>
+    <p id="s3-sub">Laatste stap — wat wil je bereiken en is er iets dat ik moet weten?</p>
+  </div>
+  <div class="section">
+    <div class="section-label" id="s3-l1">Doelstelling</div>
+    <div class="grid">
+      <div class="field">
+        <label id="lbl-doel">Hoofddoel</label>
+        <select id="doel">
+          <option value="algemene conditie verbeteren" id="o-d1">Algemene conditie</option>
+          <option value="gewicht verliezen" id="o-d2">Gewicht verliezen</option>
+          <option value="spiermassa opbouwen" id="o-d3">Spiermassa opbouwen</option>
+          <option value="sneller lopen" id="o-d4">Sneller lopen</option>
+          <option value="loopwedstrijd voorbereiden" id="o-d5">Loopwedstrijd voorbereiden</option>
+          <option value="sterker worden" id="o-d6">Sterker worden</option>
+          <option value="fitter worden en langer leven" id="o-d7">Fitter worden & langer leven</option>
+        </select>
+      </div>
+      <div class="field">
+        <label id="lbl-termijn">Termijn</label>
+        <select id="termijn">
+          <option value="4 weken" id="o-tr1">4 weken</option>
+          <option value="8 weken" id="o-tr2" selected>8 weken</option>
+          <option value="3 maanden" id="o-tr3">3 maanden</option>
+          <option value="6 maanden" id="o-tr4">6 maanden</option>
+          <option value="geen specifieke termijn" id="o-tr5">Geen specifieke termijn</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label id="lbl-specdoel">Specifiek doel<span class="opt-tag" id="opt3">optioneel</span></label>
+        <input id="specdoel" placeholder="bijv. 10km onder 40 min, eerste halve marathon afmaken..."/>
+        <span class="hint-text" id="hint-specdoel">Geef je schema een richting — hoe concreter, hoe beter</span>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-label" id="s3-l2">Gezondheid & blessures</div>
+    <div class="field">
+      <label id="lbl-bles">Blessures, pijn of medische aandoeningen</label>
+      <textarea id="blessures" rows="3" placeholder="bijv. kniepijn links, rughernia, hoge bloeddruk... (laat leeg als geen)"></textarea>
+      <span class="hint-text" id="hint-bles">Enkel gebruikt om je schema veilig aan te passen</span>
+    </div>
+  </div>
+  <div class="error-box" id="err"></div>
+  <div class="btn-row">
+    <button class="btn-back-step" onclick="goStep(2)" id="back2">← Terug</button>
+    <button class="btn-next" onclick="genereer()" id="btn3">Genereer mijn schema →</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result">
+  <div id="result-content"></div>
+  <div class="action-row">
+    <button class="btn-download" onclick="window.print()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span id="btn-download-txt">Opslaan als PDF / Afprinten</span>
+    </button>
+    <button class="btn-restart" onclick="restart()" id="btn-restart">← Nieuw schema</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+let lang='nl';
+let hasCoach=false;
+let currentStep=1;
+
+const days={nl:['Ma','Di','Wo','Do','Vr','Za','Zo'],en:['Mon','Tue','Wed','Thu','Fri','Sat','Sun']};
+
+const tx={
+nl:{
+  hSub:'Schema Generator',coachTitle:'Hybrid Coach · FTL Performance',
+  s1Num:'Stap 1 van 3',s2Num:'Stap 2 van 3',s3Num:'Stap 3 van 3',
+  s1Title:'Vertel me <em>wie je bent</em>',s1Sub:'Geen verplichte velden behalve je leeftijd — hoe meer je deelt, hoe beter het schema.',
+  s2Title:'Jouw <em>trainingsachtergrond</em>',s2Sub:'Hoe je nu traint bepaalt waar we vertrekken — eerlijk antwoorden geeft het beste schema.',
+  s3Title:'Jouw <em>doel</em> & gezondheid',s3Sub:'Laatste stap — wat wil je bereiken en is er iets dat ik moet weten?',
+  progLabel:'Stap',progOf:'van',progTime:['~2 min','~3 min','~1 min'],
+  s1l1:'Jouw gegevens',s1l2:'Jouw situatie',s2l1:'Lopen & Kracht apart',s2l2:'Beschikbaarheid & uitrusting',s2l3:'Sportachtergrond',s2l4:'Reeds een coach?',
+  s3l1:'Doelstelling',s3l2:'Gezondheid & blessures',
+  lNaam:'Naam',lLeeftijd:'Leeftijd',lGewicht:'Gewicht (kg)',lGrootte:'Grootte (cm)',lJob:'Jobsituatie',lThuis:'Thuissituatie',
+  lLoop:'Loopniveau',lKracht:'Krachtniveau',lDagen:'Dagen per week',lSessie:'Tijd per sessie',lUit:'Beschikbare uitrusting',
+  lSport:'Sporten die je deed of doet',lCoachQ:'Werk je al samen met een coach voor lopen of kracht?',lCoachPijler:'Voor welke pijler?',
+  lLoopFreq:'Hoe vaak per week loop je?',lLoopDagen:'Op welke dagen?',lKrachtFreq:'Hoe vaak per week train je kracht?',lKrachtDagen:'Op welke dagen?',
+  lDoel:'Hoofddoel',lTermijn:'Termijn',lSpecDoel:'Specifiek doel',lBles:'Blessures, pijn of medische aandoeningen',
+  opt:'optioneel',hintGew:'Helpt bij belastingberekening — niet verplicht',hintGrt:'Samen met gewicht voor betere inschatting',
+  hintSpecDoel:'Geef je schema een richting — hoe concreter, hoe beter',hintBles:'Enkel gebruikt om je schema veilig aan te passen',
+  reqNote:'* Leeftijd is verplicht',
+  oJ1:'Zittend bureauwerk',oJ2:'Fysieke job',oJ3:'Ploegendienst / onregelmatige uren',oJ4:'Voornamelijk thuiswerken',oJ5:'Wisselend',
+  oT1:'Alleenwonend',oT2:'Samenwonend, geen kinderen',oT3:'Samenwonend met kinderen',oT4:'Druk gezinsleven',
+  oLn:'Geen ervaring',oLo:'Occasioneel (<5km)',oLm:'Regelmatig (5–10km)',oLh:'Ervaren (10km+)',oLx:'Wedstrijdloper',
+  oKn:'Geen ervaring',oKb:'Basis (<6 maanden)',oKm:'Gemiddeld (6–24 mnd)',oKa:'Gevorderd (2+ jaar)',
+  oS1:'30–45 minuten',oS2:'45–60 minuten',oS3:'60–90 minuten',oS4:'90+ minuten',
+  oUg:'Volledige gym',oU0:'Thuis – geen materiaal',oUd:'Thuis – dumbbells',oUf:'Thuis – volledig uitgerust',oUb:'Buiten + gym',
+  oCn:'Nee',oCj:'Ja',oCp1:'Lopen — ik heb al een loopcoach',oCp2:'Kracht — ik heb al een krachtcoach',oCp3:'Beide',
+  oD1:'Algemene conditie',oD2:'Gewicht verliezen',oD3:'Spiermassa opbouwen',oD4:'Sneller lopen',oD5:'Loopwedstrijd voorbereiden',oD6:'Sterker worden',oD7:'Fitter worden & langer leven',
+  oTr1:'4 weken',oTr2:'8 weken',oTr3:'3 maanden',oTr4:'6 maanden',oTr5:'Geen specifieke termijn',
+  btn1:'Verder naar mijn training →',btn2:'Naar mijn doelstelling →',btn3:'Genereer mijn schema →',
+  back1:'← Terug',back2:'← Terug',restart:'← Nieuw schema',download:'Opslaan als PDF / Afprinten',
+  loading:'Schema wordt gegenereerd...',errMsg:'Er ging iets mis. Probeer opnieuw.',
+  tipsLabel:'Coach tips',rpeTitle:'RPE — Hoe hard is hard?',
+  progNoteTitle:'Hoe ga je verder na week 1?',
+  ctaTitle:'Wil je een volledig persoonlijk plan?',
+  ctaSub:'Dit schema is een vertrekpunt. Een persoonlijk coachingtraject houdt rekening met jouw progressie, past wekelijks aan en begeleidt je van begin tot finish.',
+  ctaBtn:'Contacteer Dries',ctaBtnSec:'Volg @ftlperformance',
+  resultFor:'Schema voor',resultForYou:'jou',footerNote:'Schema gegenereerd door FTL<em>PERFORMANCE</em> · Week 1',
+  dayLabels:days.nl,
+  namePh:'bijv. Jana',agePh:'bijv. 28',weightPh:'bijv. 75',heightPh:'bijv. 178',
+  sportPh:'bijv. voetbal 10 jaar, yoga, crossfit...',specDPh:'bijv. 10km onder 40 min, eerste halve marathon afmaken...',
+  blesPh:'bijv. kniepijn links, rughernia, hoge bloeddruk... (laat leeg als geen)',
+  rpeRows:[
+    {n:'1–2',l:'Wandeltempo — moeiteloos'},
+    {n:'3–4',l:'Rustig — je kan zingen'},
+    {n:'5–6',l:'Comfortabel maar actief — je kan praten'},
+    {n:'7',l:'Gecontroleerd zwaar — korte zinnen'},
+    {n:'8',l:'Hard — je wil liever niet spreken'},
+    {n:'9–10',l:'Maximum — niet vol te houden'}
+  ],
+  prompt(f){
+    const isLoopBeg=f.loopniveau.includes('geen')||f.loopniveau.includes('occasioneel');
+    const isKrachtBeg=f.krachtniveau.includes('geen')||f.krachtniveau.includes('basis');
+    const isBeg=isLoopBeg&&isKrachtBeg;
+    let coachInfo='Geen andere coach';
+    if(f.hasCoach){
+      let det=[];
+      if(f.coachPijler==='lopen'||f.coachPijler==='beide') det.push(`Loop: ${f.loopFreq}${f.loopDagen?' op '+f.loopDagen:''}`);
+      if(f.coachPijler==='kracht'||f.coachPijler==='beide') det.push(`Kracht: ${f.krachtFreq}${f.krachtDagen?' op '+f.krachtDagen:''}`);
+      coachInfo=`Al een coach voor: ${f.coachPijler}. Bestaand schema: ${det.join(' | ')}. Bouw hier omheen — vul aan, overlap niet.`;
+    }
+    return`Je bent Dries, ervaren hybride coach bij FTL Performance.
+Genereer een gepersonaliseerd weekschema (week 1) op basis van:
+- Naam: ${f.naam||'Klant'}, Leeftijd: ${f.leeftijd} jaar${f.gewicht?', Gewicht: '+f.gewicht+'kg':''}${f.grootte?', Grootte: '+f.grootte+'cm':''}
+- Job: ${f.job}, Thuis: ${f.thuis}
+- Loopniveau: ${f.loopniveau}, Krachtniveau: ${f.krachtniveau}
+- Dagen: ${f.dagen}/week, Sessieduur: ${f.sessie}, Uitrusting: ${f.uitrusting}
+- Sportachtergrond: ${f.sport||'niet opgegeven'}
+- ${coachInfo}
+- Doel: ${f.doel}, Termijn: ${f.termijn}${f.specdoel?', Specifiek: '+f.specdoel:''}
+- Blessures: ${f.blessures||'geen'}
+
+KRITIEKE REGELS:
+1. LOPEN: werk ALTIJD met tijd (minuten), NOOIT met afstand of hartslag. Gebruik RPE 1-10. Beschrijf bij elke loopsessie hoe het moet voelen.
+2. TAAL: ${isBeg?'Beginner — gebruik gewone termen (squat, push-up, rustig lopen). GEEN vakjargon zoals LT1, axiale belasting, VO2max.':isLoopBeg?'Loop-beginner: simpele lopterminologie. Kracht mag technischer.':isKrachtBeg?'Kracht-beginner: simpele krachtterminologie. Lopen mag technischer.':'Gevorderd — technische termen zijn ok (LT1, RPE, RDL, etc.)'}
+3. RUSTDAGEN: omschrijf altijd wat ze kunnen doen op rustdagen (wandelen, rekken, ...)
+4. TIPS: tip 1-3 zijn coachingstips. Tip 4 = wat als je een sessie mist? Tip 5 = subtiele hint dat een persoonlijk coach kan helpen bij techniek en progressie — vriendelijk, niet opdringerig.
+5. PROGRESSIE: voeg een "progressie" veld toe met 2-3 zinnen over hoe ze dit schema aanpassen in week 2-3.${f.specdoel?'\n6. Stem het schema af op het specifieke doel: '+f.specdoel:''}
+
+Antwoord ALLEEN als JSON zonder markdown. BELANGRIJK: gebruik GEEN apostrofs (') in de tekst, schrijf voluit (je kan -> jij kan). Gebruik geen speciale aanhalingstekens.
+{"samenvatting":"2-3 zinnen","weekschema":[{"dag":"Maandag","type":"Kracht","titel":"korte titel","duur":"45 min","inhoud":["oefening met uitleg voor beginners of RPE voor lopers"],"intensiteit":"Matig"}],"tips":["tip1","tip2","tip3","tip bij gemiste sessie","coaching hint"],"progressie":"hoe aanpassen in week 2-3"}`;
+  }
+},
+en:{
+  hSub:'Plan Generator',coachTitle:'Hybrid Coach · FTL Performance',
+  s1Num:'Step 1 of 3',s2Num:'Step 2 of 3',s3Num:'Step 3 of 3',
+  s1Title:'Tell me <em>about yourself</em>',s1Sub:'Only your age is required — the more you share, the better your plan.',
+  s2Title:'Your <em>training background</em>',s2Sub:'How you train now determines where we start — honest answers give the best plan.',
+  s3Title:'Your <em>goal</em> & health',s3Sub:'Last step — what do you want to achieve and is there anything I should know?',
+  progLabel:'Step',progOf:'of',progTime:['~2 min','~3 min','~1 min'],
+  s1l1:'Your details',s1l2:'Your situation',s2l1:'Running & Strength separately',s2l2:'Availability & equipment',s2l3:'Sports background',s2l4:'Already have a coach?',
+  s3l1:'Goal',s3l2:'Health & injuries',
+  lNaam:'Name',lLeeftijd:'Age',lGewicht:'Weight (kg)',lGrootte:'Height (cm)',lJob:'Work situation',lThuis:'Home situation',
+  lLoop:'Running level',lKracht:'Strength level',lDagen:'Days per week',lSessie:'Time per session',lUit:'Available equipment',
+  lSport:'Sports you do or have done',lCoachQ:'Are you already working with a coach for running or strength?',lCoachPijler:'For which discipline?',
+  lLoopFreq:'How many times per week do you run?',lLoopDagen:'On which days?',lKrachtFreq:'How many times per week do you train strength?',lKrachtDagen:'On which days?',
+  lDoel:'Main goal',lTermijn:'Timeline',lSpecDoel:'Specific goal',lBles:'Injuries, pain or medical conditions',
+  opt:'optional',hintGew:'Helps with load calculation — not required',hintGrt:'Together with weight for better estimation',
+  hintSpecDoel:'Give your plan a direction — the more specific, the better',hintBles:'Only used to safely adapt your plan',
+  reqNote:'* Age is required',
+  oJ1:'Desk job / sedentary',oJ2:'Physical job',oJ3:'Shift work / irregular hours',oJ4:'Mainly working from home',oJ5:'Varies',
+  oT1:'Living alone',oT2:'Living with partner, no kids',oT3:'Living with partner and kids',oT4:'Busy family life',
+  oLn:'No experience',oLo:'Occasional (<5km)',oLm:'Regular (5–10km)',oLh:'Experienced (10km+)',oLx:'Competitive runner',
+  oKn:'No experience',oKb:'Beginner (<6 months)',oKm:'Intermediate (6–24 mths)',oKa:'Advanced (2+ years)',
+  oS1:'30–45 minutes',oS2:'45–60 minutes',oS3:'60–90 minutes',oS4:'90+ minutes',
+  oUg:'Full gym',oU0:'Home – no equipment',oUd:'Home – dumbbells',oUf:'Home – fully equipped',oUb:'Outdoor + gym',
+  oCn:'No',oCj:'Yes',oCp1:'Running — I already have a running coach',oCp2:'Strength — I already have a strength coach',oCp3:'Both',
+  oD1:'General fitness',oD2:'Lose weight',oD3:'Build muscle',oD4:'Run faster',oD5:'Prepare for a race',oD6:'Get stronger',oD7:'Get fitter & live longer',
+  oTr1:'4 weeks',oTr2:'8 weeks',oTr3:'3 months',oTr4:'6 months',oTr5:'No specific timeline',
+  btn1:'Continue to my training →',btn2:'To my goal →',btn3:'Generate my plan →',
+  back1:'← Back',back2:'← Back',restart:'← New plan',download:'Save as PDF / Print',
+  loading:'Generating your plan...',errMsg:'Something went wrong. Please try again.',
+  tipsLabel:'Coach tips',rpeTitle:'RPE — How hard is hard?',
+  progNoteTitle:'How to progress after week 1?',
+  ctaTitle:'Want a fully personalised coaching plan?',
+  ctaSub:'This plan is a starting point. Personal coaching tracks your progress, adapts weekly and guides you from start to finish.',
+  ctaBtn:'Contact Dries',ctaBtnSec:'Follow @ftlperformance',
+  resultFor:'Plan for',resultForYou:'you',footerNote:'Plan generated by FTL<em>PERFORMANCE</em> · Week 1',
+  dayLabels:days.en,
+  namePh:'e.g. Jana',agePh:'e.g. 28',weightPh:'e.g. 75',heightPh:'e.g. 178',
+  sportPh:'e.g. football 10 years, yoga, crossfit...',specDPh:'e.g. 10km under 40 min, complete first half marathon...',
+  blesPh:'e.g. left knee pain, herniated disc, high blood pressure... (leave empty if none)',
+  rpeRows:[
+    {n:'1–2',l:'Walking pace — effortless'},
+    {n:'3–4',l:'Easy — you could sing'},
+    {n:'5–6',l:'Comfortable but active — can hold a conversation'},
+    {n:'7',l:'Controlled hard — short sentences only'},
+    {n:'8',l:'Hard — you prefer not to speak'},
+    {n:'9–10',l:'Maximum effort — not sustainable'}
+  ],
+  prompt(f){
+    const isLoopBeg=f.loopniveau.includes('geen')||f.loopniveau.includes('occasioneel')||f.loopniveau.includes('no')||f.loopniveau.includes('occasional');
+    const isKrachtBeg=f.krachtniveau.includes('geen')||f.krachtniveau.includes('basis')||f.krachtniveau.includes('no')||f.krachtniveau.includes('beginner');
+    const isBeg=isLoopBeg&&isKrachtBeg;
+    let coachInfo='No other coach';
+    if(f.hasCoach){
+      let det=[];
+      if(f.coachPijler==='lopen'||f.coachPijler==='beide') det.push(`Running: ${f.loopFreq}${f.loopDagen?' on '+f.loopDagen:''}`);
+      if(f.coachPijler==='kracht'||f.coachPijler==='beide') det.push(`Strength: ${f.krachtFreq}${f.krachtDagen?' on '+f.krachtDagen:''}`);
+      coachInfo=`Already has a coach for: ${f.coachPijler}. Existing schedule: ${det.join(' | ')}. Build around this — complement, don't overlap.`;
+    }
+    return`You are Dries, an experienced hybrid coach at FTL Performance.
+Generate a personalised weekly training plan (week 1) based on:
+- Name: ${f.naam||'Client'}, Age: ${f.leeftijd}${f.gewicht?', Weight: '+f.gewicht+'kg':''}${f.grootte?', Height: '+f.grootte+'cm':''}
+- Work: ${f.job}, Home: ${f.thuis}
+- Running level: ${f.loopniveau}, Strength level: ${f.krachtniveau}
+- Days: ${f.dagen}/week, Session time: ${f.sessie}, Equipment: ${f.uitrusting}
+- Sports background: ${f.sport||'not provided'}
+- ${coachInfo}
+- Goal: ${f.doel}, Timeline: ${f.termijn}${f.specdoel?', Specific: '+f.specdoel:''}
+- Injuries: ${f.blessures||'none'}
+
+CRITICAL RULES:
+1. RUNNING: ALWAYS use time (minutes), NEVER distance or heart rate. Use RPE 1-10. Describe how each run should FEEL.
+2. LANGUAGE: ${isBeg?'Beginner — use plain terms (squat, push-up, easy jog). NO jargon like LT1, axial load, VO2max.':isLoopBeg?'Running beginner: simple run terms. Strength can be more technical.':isKrachtBeg?'Strength beginner: simple strength terms. Running can be more technical.':'Advanced — technical terms are fine (LT1, RPE, RDL, etc.)'}
+3. REST DAYS: always describe what they can do on rest days (walk, stretch, foam roll...)
+4. TIPS: tips 1-3 are coaching tips. Tip 4 = what to do if you miss a session. Tip 5 = gentle hint that a personal coach helps with technique and progression — friendly, not pushy.
+5. PROGRESSION: add a "progressie" field with 2-3 sentences on how to adapt this plan in weeks 2-3.${f.specdoel?'\n6. Align the plan with the specific goal: '+f.specdoel:''}
+
+Reply ONLY as JSON without markdown, use English day names. IMPORTANT: do NOT use apostrophes (') in any text values, write in full (you can -> you can, don't -> do not). No special quote characters.
+{"samenvatting":"2-3 sentences","weekschema":[{"dag":"Monday","type":"Strength","titel":"short title","duur":"45 min","inhoud":["exercise with beginner cue or RPE for runners"],"intensiteit":"Moderate"}],"tips":["tip1","tip2","tip3","missed session tip","coaching hint"],"progressie":"how to adapt in weeks 2-3"}`;
+  }
+}
+};
+
+function setLang(l,btn){
+  lang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updateDayLabels();
+  applyLang();
+}
+
+function updateDayLabels(){
+  const d=days[lang];
+  ['loop-dagen','kracht-dagen'].forEach(id=>{
+    const pills=document.querySelectorAll('#'+id+' .day-pill');
+    pills.forEach((p,i)=>{ p.dataset.day=d[i]; p.textContent=d[i]; });
+  });
+}
+
+function applyLang(){
+  const t=tx[lang];
+  const ids={
+    'h-sub':'hSub','coach-title-txt':'coachTitle',
+    's1-num':'s1Num','s2-num':'s2Num','s3-num':'s3Num',
+    's1-l1':'s1l1','s1-l2':'s1l2','s2-l1':'s2l1','s2-l2':'s2l2','s2-l3':'s2l3','s2-l4':'s2l4',
+    's3-l1':'s3l1','s3-l2':'s3l2',
+    'lbl-naam':'lNaam','lbl-job':'lJob','lbl-thuis':'lThuis',
+    'lbl-loop':'lLoop','lbl-kracht':'lKracht','lbl-dagen':'lDagen','lbl-sessie':'lSessie','lbl-uit':'lUit',
+    'lbl-sport':'lSport','lbl-coach-q':'lCoachQ','lbl-coach-pijler':'lCoachPijler',
+    'lbl-loop-freq':'lLoopFreq','lbl-loop-dagen':'lLoopDagen',
+    'lbl-kracht-freq':'lKrachtFreq','lbl-kracht-dagen':'lKrachtDagen',
+    'lbl-doel':'lDoel','lbl-termijn':'lTermijn','lbl-specdoel':'lSpecDoel','lbl-bles':'lBles',
+    'hint-gew':'hintGew','hint-grt':'hintGrt','hint-specdoel':'hintSpecDoel','hint-bles':'hintBles',
+    'req-note':'reqNote','btn1':'btn1','btn2':'btn2','btn3':'btn3',
+    'back1':'back1','back2':'back2','btn-restart':'restart','btn-download-txt':'download',
+    'opt1':'opt','opt2':'opt','opt3':'opt'
+  };
+  Object.entries(ids).forEach(([id,key])=>{
+    const el=document.getElementById(id);
+    if(el&&t[key]) el.textContent=t[key];
+  });
+  document.getElementById('s1-title').innerHTML=t.s1Title;
+  document.getElementById('s2-title').innerHTML=t.s2Title;
+  document.getElementById('s3-title').innerHTML=t.s3Title;
+  document.getElementById('lbl-leeftijd').innerHTML=t.lLeeftijd+' <span style="color:var(--error)">*</span>';
+  document.getElementById('lbl-gewicht').innerHTML=t.lGewicht+'<span class="opt-tag">'+t.opt+'</span>';
+  document.getElementById('lbl-grootte').innerHTML=t.lGrootte+'<span class="opt-tag">'+t.opt+'</span>';
+  document.getElementById('lbl-specdoel').innerHTML=t.lSpecDoel+'<span class="opt-tag">'+t.opt+'</span>';
+  document.getElementById('naam').placeholder=t.namePh;
+  document.getElementById('leeftijd').placeholder=t.agePh;
+  document.getElementById('gewicht').placeholder=t.weightPh;
+  document.getElementById('grootte').placeholder=t.heightPh;
+  document.getElementById('sportachtergrond').placeholder=t.sportPh;
+  document.getElementById('specdoel').placeholder=t.specDPh;
+  document.getElementById('blessures').placeholder=t.blesPh;
+  document.getElementById('coach-nee').textContent=t.oCn;
+  document.getElementById('coach-ja').textContent=t.oCj;
+  const optMap={'o-j1':'oJ1','o-j2':'oJ2','o-j3':'oJ3','o-j4':'oJ4','o-j5':'oJ5','o-t1':'oT1','o-t2':'oT2','o-t3':'oT3','o-t4':'oT4','o-ln':'oLn','o-lo':'oLo','o-lm':'oLm','o-lh':'oLh','o-lx':'oLx','o-kn':'oKn','o-kb':'oKb','o-km':'oKm','o-ka':'oKa','o-s1':'oS1','o-s2':'oS2','o-s3':'oS3','o-s4':'oS4','o-ug':'oUg','o-u0':'oU0','o-ud':'oUd','o-uf':'oUf','o-ub':'oUb','o-cp1':'oCp1','o-cp2':'oCp2','o-cp3':'oCp3','o-d1':'oD1','o-d2':'oD2','o-d3':'oD3','o-d4':'oD4','o-d5':'oD5','o-d6':'oD6','o-d7':'oD7','o-tr1':'oTr1','o-tr2':'oTr2','o-tr3':'oTr3','o-tr4':'oTr4','o-tr5':'oTr5'};
+  Object.entries(optMap).forEach(([id,key])=>{const el=document.getElementById(id);if(el&&t[key])el.textContent=t[key];});
+  updateProgress(currentStep);
+}
+
+function updateProgress(step){
+  const t=tx[lang];
+  document.getElementById('prog-fill').style.width=['33%','66%','100%'][step-1];
+  document.getElementById('prog-label').innerHTML=t.progLabel+' <em>'+step+'</em> '+t.progOf+' 3';
+  document.getElementById('prog-time').textContent=t.progTime[step-1];
+  for(let i=1;i<=3;i++){
+    document.getElementById('dot'+i).className='step-dot'+(i<step?' done':i===step?' active':'');
+  }
+}
+
+function showStep(n){
+  ['step1','step2','step3','result'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById(n==='result'?'result':'step'+n).style.display='block';
+  document.getElementById('progress-wrap').style.display=n==='result'?'none':'block';
+  window.scrollTo(0,0);
+}
+
+function goStep(n){
+  if(n===2&&!document.getElementById('leeftijd').value){
+    alert(lang==='nl'?'Vul je leeftijd in om verder te gaan.':'Please fill in your age to continue.');
+    return;
+  }
+  currentStep=n;
+  updateProgress(n);
+  showStep(n);
+}
+
+function setCoach(val){
+  hasCoach=val;
+  document.getElementById('coach-nee').className='toggle-btn'+(val?'':' sel');
+  document.getElementById('coach-ja').className='toggle-btn'+(val?' sel':'');
+  document.getElementById('coach-sub').style.display=val?'block':'none';
+  if(val) updateCoachDetail();
+  else document.getElementById('coach-detail').style.display='none';
+}
+
+function updateCoachDetail(){
+  const pijler=document.getElementById('coach-pijler').value;
+  document.getElementById('coach-detail').style.display='block';
+  document.getElementById('loop-detail').style.display=(pijler==='lopen'||pijler==='beide')?'block':'none';
+  document.getElementById('kracht-detail').style.display=(pijler==='kracht'||pijler==='beide')?'block':'none';
+}
+
+function toggleDay(btn){ btn.classList.toggle('sel'); }
+
+function getSelectedDays(containerId){
+  return Array.from(document.querySelectorAll('#'+containerId+' .day-pill.sel')).map(p=>p.dataset.day).join(', ');
+}
+
+function icoon(type){
+  const m={Kracht:'💪',Strength:'💪',Lopen:'🏃',Running:'🏃',Hybride:'⚡',Hybrid:'⚡',Rust:'😴',Rest:'😴',Herstel:'🔄',Recovery:'🔄'};
+  return m[type]||'📅';
+}
+
+function kleur(i){
+  if(['Hoog','High'].includes(i)) return '#FF5C5C';
+  if(['Matig','Moderate'].includes(i)) return '#C8F04A';
+  if(['Laag','Low'].includes(i)) return '#5CE0C8';
+  return '#888';
+}
+
+async function genereer(){
+  const t=tx[lang];
+  const btn3=document.getElementById('btn3');
+  const f={
+    naam:document.getElementById('naam').value,
+    leeftijd:document.getElementById('leeftijd').value,
+    gewicht:document.getElementById('gewicht').value,
+    grootte:document.getElementById('grootte').value,
+    job:document.getElementById('job').value,
+    thuis:document.getElementById('thuis').value,
+    loopniveau:document.getElementById('loopniveau').value,
+    krachtniveau:document.getElementById('krachtniveau').value,
+    dagen:document.getElementById('dagen').value,
+    sessie:document.getElementById('sessie').value,
+    uitrusting:document.getElementById('uitrusting').value,
+    sport:document.getElementById('sportachtergrond').value,
+    hasCoach,
+    coachPijler:document.getElementById('coach-pijler').value,
+    loopFreq:(document.getElementById('loop-freq')||{}).value||'',
+    loopDagen:getSelectedDays('loop-dagen'),
+    krachtFreq:(document.getElementById('kracht-freq')||{}).value||'',
+    krachtDagen:getSelectedDays('kracht-dagen'),
+    doel:document.getElementById('doel').value,
+    termijn:document.getElementById('termijn').value,
+    specdoel:document.getElementById('specdoel').value,
+    blessures:document.getElementById('blessures').value
+  };
+
+  btn3.disabled=true;
+  btn3.textContent=t.loading;
+  document.getElementById('err').style.display='none';
+
+  try{
+    const res=await fetch('/api/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:4096,
+        system:'You are a JSON API. Return ONLY valid JSON. No markdown fences, no explanation. Just the raw JSON object.',
+        messages:[{role:'user',content:t.prompt(f)}]
+      })
+    });
+    const data=await res.json();
+    if(data.error){throw new Error('API fout: '+data.error.message);}
+    // Check of response afgekapt is
+    if(data.stop_reason==='max_tokens'){
+      console.error('Response afgekapt door max_tokens');
+    }
+    const raw=(data.content||[]).map(function(b){return b.text||'';}).join('');
+    // Strip markdown fences if present
+    const stripped=raw.replace(/```json/g,'').replace(/```/g,'').trim();
+    // Extract JSON: find first { and last }
+    const i1=stripped.indexOf('{');
+    const i2=stripped.lastIndexOf('}');
+    if(i1===-1||i2===-1){throw new Error('Geen geldige response ontvangen.');}
+    const jsonStr=stripped.slice(i1,i2+1);
+    let s;
+    try{
+      s=JSON.parse(jsonStr);
+    }catch(firstErr){
+      try{
+        s=JSON.parse(jsonStr.replace(/\n/g,' ').replace(/\r/g,' '));
+      }catch(secondErr){
+        console.error('Parse error:', secondErr.message);
+        throw new Error(data.stop_reason==='max_tokens'?'Schema te lang.':'Schema kon niet worden verwerkt. Probeer opnieuw.');
+      }
+    }
+
+        const isRest=tp=>['Rust','Rest'].includes(tp);
+
+    const rpeHtml=`<div class="rpe-legend">
+      <div class="rpe-legend-title">${t.rpeTitle}</div>
+      <div class="rpe-rows">${t.rpeRows.map(r=>`<div class="rpe-row"><span class="rpe-num">${r.n}</span><span>${r.l}</span></div>`).join('')}</div>
+    </div>`;
+
+    const progHtml=s.progressie?`<div class="progress-note">
+      <div class="progress-note-title">${t.progNoteTitle}</div>
+      <div class="progress-note-text">${s.progressie}</div>
+    </div>`:'';
+
+    const ctaHtml=`<div class="cta-block">
+      <div class="cta-title">${t.ctaTitle}</div>
+      <div class="cta-sub">${t.ctaSub}</div>
+      <div class="cta-btns">
+        <a class="cta-btn-main" href="mailto:info@ftlperformance.be">${t.ctaBtn}</a>
+        <a class="cta-btn-sec" href="https://instagram.com/ftlperformance" target="_blank">${t.ctaBtnSec}</a>
+      </div>
+    </div>`;
+
+    document.getElementById('result-content').innerHTML=`
+      <div class="result-name">${t.resultFor} <em>${f.naam||t.resultForYou}</em></div>
+      <div class="result-sum">${s.samenvatting}</div>
+      ${s.weekschema.map(d=>`
+        <div class="day-card" style="border-left-color:${kleur(d.intensiteit)}">
+          <div class="day-top">
+            <div class="day-left">
+              <span class="day-icon">${icoon(d.type)}</span>
+              <div><div class="day-name">${d.dag}</div><div class="day-stitle">${d.titel}</div></div>
+            </div>
+            <div class="day-right">
+              <div class="day-int" style="color:${kleur(d.intensiteit)}">${d.intensiteit}</div>
+              <div class="day-dur">${d.duur}</div>
+            </div>
+          </div>
+          ${d.inhoud&&d.inhoud.length&&!isRest(d.type)?`<div class="day-items">${d.inhoud.map(i=>`<div class="day-item"><span class="dash">—</span><span>${i}</span></div>`).join('')}</div>`:''}
+        </div>`).join('')}
+      ${s.tips&&s.tips.length?`<div class="tips"><div class="tips-label">${t.tipsLabel}</div>${s.tips.map((tip,i)=>`<div class="tip"><span class="tip-n">${i+1}.</span><span>${tip}</span></div>`).join('')}</div>`:''}
+      ${rpeHtml}
+      ${progHtml}
+      ${ctaHtml}
+      <div class="footer-note">${t.footerNote}</div>`;
+
+    showStep('result');
+  }catch(e){
+    console.error('FTL Error:', e.message);
+    const errEl=document.getElementById('err');
+    errEl.textContent=e.message||tx[lang].errMsg;
+    errEl.style.display='block';
+    btn3.disabled=false;
+    btn3.textContent=tx[lang].btn3;
+  }
+}
+
+function restart(){
+  ['naam','leeftijd','gewicht','grootte','sportachtergrond','specdoel','blessures'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('.day-pill').forEach(p=>p.classList.remove('sel'));
+  document.getElementById('coach-detail').style.display='none';
+  setCoach(false);
+  currentStep=1;
+  updateProgress(1);
+  showStep(1);
+}
+
+showStep(1);
+updateProgress(1);
+</script>
+</body>
+</html>
