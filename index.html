@@ -935,7 +935,7 @@ async function genereer(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-6',
+        model:'claude-haiku-4-5-20251001',
         max_tokens:4096,
         system:lang==='nl'?'Je bent een JSON API. Geef ALLEEN valide JSON terug. Geen markdown, geen uitleg. Alleen het JSON object. Alle tekst in het Nederlands.':'You are a JSON API. Return ONLY valid JSON. No markdown fences, no explanation. Just the raw JSON object. ALL text values must be in English.',
         messages:[{role:'user',content:t.prompt(f)}]
