@@ -186,6 +186,14 @@ body{background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(-
   .toggle-row{gap:6px}
   .toggle-btn{font-size:12px;padding:8px}
 }
+
+/* LOADING OVERLAY */
+.loading-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,15,15,0.92);z-index:999;justify-content:center;align-items:center;flex-direction:column;gap:20px}
+.loading-overlay.open{display:flex}
+.loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{font-size:15px;color:var(--text);text-align:center;min-height:24px;transition:opacity 0.3s}
+.loading-sub{font-size:12px;color:var(--muted);text-align:center}
 /* CONTACT MODAL */
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;padding:20px}
 .modal-overlay.open{display:flex}
@@ -535,7 +543,8 @@ nl:{
   oTr1:'4 weken',oTr2:'8 weken',oTr3:'3 maanden',oTr4:'6 maanden',oTr5:'Geen specifieke termijn',oD2d:'2 dagen',oD3d:'3 dagen',oD4d:'4 dagen',oD5d:'5 dagen',oD6d:'6 dagen',
   btn1:'Verder naar mijn training →',btn2:'Naar mijn doelstelling →',btn3:'Genereer mijn schema →',
   back1:'← Terug',back2:'← Terug',restart:'← Nieuw schema',download:'Opslaan als PDF / Afprinten',
-  loading:'Schema wordt gegenereerd...',errMsg:'Er ging iets mis. Probeer opnieuw.',
+  loading:'Schema wordt gegenereerd...',
+  loadingMsgs:['Jouw gegevens worden geanalyseerd...','Lopen en kracht worden in balans gebracht...','Hersteldagen worden ingepland...','Laatste aanpassingen op basis van jouw niveau...','Schema wordt afgerond...'],errMsg:'Er ging iets mis. Probeer opnieuw.',
   tipsLabel:'Coach tips',rpeTitle:'RPE — Hoe hard is hard?',
   progNoteTitle:'Hoe ga je verder na week 1?',
   ctaTitle:'Wil je een volledig persoonlijk plan?',
@@ -617,7 +626,8 @@ en:{
   oTr1:'4 weeks',oTr2:'8 weeks',oTr3:'3 months',oTr4:'6 months',oTr5:'No specific timeline',oD2d:'2 days',oD3d:'3 days',oD4d:'4 days',oD5d:'5 days',oD6d:'6 days',
   btn1:'Continue to my training →',btn2:'To my goal →',btn3:'Generate my plan →',
   back1:'← Back',back2:'← Back',restart:'← New plan',download:'Save as PDF / Print',
-  loading:'Generating your plan...',errMsg:'Something went wrong. Please try again.',
+  loading:'Generating your plan...',
+  loadingMsgs:['Analysing your profile...','Balancing running and strength...','Scheduling recovery days...','Fine-tuning based on your level...','Finalising your plan...'],errMsg:'Something went wrong. Please try again.',
   tipsLabel:'Coach tips',rpeTitle:'RPE — How hard is hard?',
   progNoteTitle:'How to progress after week 1?',
   ctaTitle:'Want a fully personalised coaching plan?',
@@ -824,6 +834,22 @@ async function genereer(){
   btn3.disabled=true;
   btn3.textContent=t.loading;
   document.getElementById('err').style.display='none';
+  // Start loading overlay
+  var loadOvl=document.getElementById('loading-overlay');
+  var loadMsg=document.getElementById('loading-msg');
+  var loadSub=document.getElementById('loading-sub');
+  loadSub.textContent=lang==='nl'?'Dit duurt ongeveer 10-15 seconden':'This takes about 10-15 seconds';
+  loadOvl.classList.add('open');
+  var msgIdx=0;
+  var msgs=t.loadingMsgs;
+  loadMsg.textContent=msgs[0];
+  var loadInterval=setInterval(function(){
+    msgIdx++;
+    if(msgIdx<msgs.length){
+      loadMsg.style.opacity='0';
+      setTimeout(function(){loadMsg.textContent=msgs[msgIdx];loadMsg.style.opacity='1';},300);
+    }
+  },2500);
 
   try{
     const res=await fetch('/api/generate',{
@@ -906,8 +932,10 @@ async function genereer(){
       ${ctaHtml}
       <div class="footer-note">${t.footerNote}</div>`;
 
+    clearInterval(loadInterval);document.getElementById('loading-overlay').classList.remove('open');
     showStep('result');
   }catch(e){
+    clearInterval(loadInterval);document.getElementById('loading-overlay').classList.remove('open');
     console.error('FTL Error:', e.message);
     const errEl=document.getElementById('err');
     errEl.textContent=e.message||tx[lang].errMsg;
@@ -984,6 +1012,12 @@ function sendContact(){
 }
 </script>
 
+
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-msg" id="loading-msg"></div>
+  <div class="loading-sub" id="loading-sub"></div>
+</div>
 <div class="modal-overlay" id="contact-modal" onclick="if(event.target===this)closeContact()">
   <div class="modal-box" id="contact-box">
     <button class="modal-close" onclick="closeContact()">&times;</button>
