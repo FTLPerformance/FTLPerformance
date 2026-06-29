@@ -145,6 +145,47 @@ body{background:var(--dark);font-family:'Inter',system-ui,sans-serif;color:var(-
   #result{display:block!important}
 }
 
+
+/* MOBILE */
+@media(max-width:600px){
+  .header{flex-wrap:wrap;gap:8px;padding:12px 16px}
+  .coach-intro{margin-left:0;padding-left:0;border-left:none;order:3;width:100%;display:none}
+  .lang-toggle{margin-left:auto}
+  .logo{font-size:15px}
+  .logo-sub{font-size:9px}
+  .wrap{padding:20px 16px 40px}
+  .step-hero h1{font-size:19px}
+  .step-hero p{font-size:12px}
+  .section{padding:16px}
+  .section-label{font-size:9px;margin-bottom:10px}
+  .field input,.field select,.field textarea{font-size:16px;padding:10px}
+  .field label{font-size:10px}
+  .btn-next{font-size:14px;padding:14px}
+  .btn-back-step{padding:14px 14px;font-size:13px}
+  .btn-row{gap:8px}
+  .progress-wrap{padding:14px 16px 0}
+  .result-name{font-size:18px}
+  .result-sum{font-size:12px;padding:10px 12px}
+  .day-card{padding:12px 14px}
+  .day-name{font-size:13px}
+  .day-stitle{font-size:11px}
+  .day-item{font-size:11px}
+  .day-icon{font-size:16px}
+  .tips{padding:14px 16px}
+  .tip{font-size:12px}
+  .rpe-legend{padding:12px 14px}
+  .rpe-rows{grid-template-columns:1fr}
+  .cta-block{padding:16px}
+  .cta-title{font-size:14px}
+  .cta-sub{font-size:12px}
+  .action-row{flex-direction:column}
+  .btn-download,.btn-restart{min-width:100%}
+  .modal-box{padding:20px 18px;margin:10px}
+  .day-picker{gap:4px}
+  .day-pill{padding:5px 9px;font-size:11px}
+  .toggle-row{gap:6px}
+  .toggle-btn{font-size:12px;padding:8px}
+}
 /* CONTACT MODAL */
 .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;padding:20px}
 .modal-overlay.open{display:flex}
@@ -499,7 +540,7 @@ nl:{
   progNoteTitle:'Hoe ga je verder na week 1?',
   ctaTitle:'Wil je een volledig persoonlijk plan?',
   ctaSub:'Dit schema is een vertrekpunt. Een persoonlijk coachingtraject houdt rekening met jouw progressie, past wekelijks aan en begeleidt je van begin tot finish.',
-  ctaBtn:'Contacteer Dries',ctaBtnSec:'Volg @ftlperformance_',
+  ctaBtn:'Contacteer Dries',ctaBtnSec:'Volg @ftlperformance',
   resultFor:'Schema voor',resultForYou:'jou',footerNote:'Schema gegenereerd door FTL<em>PERFORMANCE</em> · Week 1',
   dayLabels:days.nl,
   namePh:'bijv. Jana',agePh:'bijv. 28',weightPh:'bijv. 75',heightPh:'bijv. 178',
@@ -834,7 +875,7 @@ async function genereer(){
       <div class="cta-sub">${t.ctaSub}</div>
       <div class="cta-btns">
         <a class="cta-btn-main" href="#" onclick="openContact();return false;">${t.ctaBtn}</a>
-        <a class="cta-btn-sec" href="https://instagram.com/ftl.performance_/" target="_blank">${t.ctaBtnSec}</a>
+        <a class="cta-btn-sec" href="https://instagram.com/ftlperformance_" target="_blank">${t.ctaBtnSec}</a>
       </div>
     </div>`;
 
@@ -877,6 +918,10 @@ function restart(){
   document.querySelectorAll('.day-pill').forEach(p=>p.classList.remove('sel'));
   document.getElementById('coach-detail').style.display='none';
   setCoach(false);
+  var b3=document.getElementById('btn3');
+  b3.disabled=false;
+  b3.textContent=tx[lang].btn3;
+  document.getElementById('err').style.display='none';
   currentStep=1;
   updateProgress(1);
   showStep(1);
@@ -890,6 +935,19 @@ function openContact(){
   document.getElementById('contact-modal').classList.add('open');
   document.getElementById('contact-form-wrap').style.display='block';
   document.getElementById('contact-ok').style.display='none';
+  // Update modal language
+  var isNl=lang==='nl';
+  document.getElementById('modal-title').textContent=isNl?'Contacteer Dries':'Contact Dries';
+  document.getElementById('modal-sub').textContent=isNl?'Stel je vraag of vertel me over je doelen — ik reageer binnen 24 uur.':'Ask your question or tell me about your goals — I will respond within 24 hours.';
+  document.getElementById('modal-lbl-name').textContent=isNl?'Naam':'Name';
+  document.getElementById('modal-lbl-email').textContent='E-mail';
+  document.getElementById('modal-lbl-msg').textContent=isNl?'Bericht':'Message';
+  document.getElementById('modal-send-btn').textContent=isNl?'Verstuur \u2192':'Send \u2192';
+  document.getElementById('contact-name').placeholder=isNl?'Je naam':'Your name';
+  document.getElementById('contact-email').placeholder=isNl?'je@email.com':'you@email.com';
+  document.getElementById('contact-msg').placeholder=isNl?'Vertel me wat je zoekt...':'Tell me what you are looking for...';
+  document.getElementById('modal-ok-title').textContent=isNl?'Bericht verzonden!':'Message sent!';
+  document.getElementById('modal-ok-sub').textContent=isNl?'Ik reageer binnen 24 uur.':'I will respond within 24 hours.';
 }
 function closeContact(){
   document.getElementById('contact-modal').classList.remove('open');
