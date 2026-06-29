@@ -579,9 +579,11 @@ Genereer een gepersonaliseerd weekschema (week 1) op basis van:
 KRITIEKE REGELS:
 1. LOPEN: werk ALTIJD met tijd (minuten), NOOIT met afstand of hartslag. Gebruik RPE 1-10. Beschrijf bij elke loopsessie hoe het moet voelen.
 2. TAAL: ${isBeg?'Beginner — gebruik gewone termen (squat, push-up, rustig lopen). GEEN vakjargon zoals LT1, axiale belasting, VO2max.':isLoopBeg?'Loop-beginner: simpele lopterminologie. Kracht mag technischer.':isKrachtBeg?'Kracht-beginner: simpele krachtterminologie. Lopen mag technischer.':'Gevorderd — technische termen zijn ok (LT1, RPE, RDL, etc.)'}
-3. RUSTDAGEN: omschrijf altijd wat ze kunnen doen op rustdagen (wandelen, rekken, ...)
-4. TIPS: tip 1-3 zijn coachingstips. Tip 4 = wat als je een sessie mist? Tip 5 = subtiele hint dat een persoonlijk coach kan helpen bij techniek en progressie — vriendelijk, niet opdringerig.
-5. PROGRESSIE: voeg een "progressie" veld toe met 2-3 zinnen over hoe ze dit schema aanpassen in week 2-3.${f.specdoel?'\n6. Stem het schema af op het specifieke doel: '+f.specdoel:''}
+3. KRACHT: elke krachtsessie is ALTIJD full body. Geen splits (geen push/pull/legs, geen upper/lower). Verdeel het volume zo dat je minstens 10-12 sets per grote spiergroep per week bereikt (borst, rug, schouders, quadriceps, hamstrings, bilspieren). Voor beginners: 8-10 sets/spiergroep/week. Voor gevorderden: 12-16 sets/spiergroep/week. Kies compound oefeningen als basis (squat, deadlift, bench press, rows, overhead press) en vul aan met accessoire-oefeningen.
+4. OEFENNAMEN: gebruik de internationaal gangbare namen. Niet vertalen naar onnatuurlijk Nederlands. Correct: squat, bench press, deadlift, Romanian deadlift, lat pulldown, hip thrust, plank. Fout: bankdrukken, doodlift, heupstoot.
+5. RUSTDAGEN: omschrijf altijd wat ze kunnen doen op rustdagen (wandelen, rekken, ...)
+6. TIPS: tip 1-3 zijn coachingstips. Tip 4 = wat als je een sessie mist? Tip 5 = subtiele hint dat een persoonlijk coach kan helpen bij techniek en progressie — vriendelijk, niet opdringerig.
+7. PROGRESSIE: voeg een "progressie" veld toe met 2-3 zinnen over hoe ze dit schema aanpassen in week 2-3.${f.specdoel?'\n8. Stem het schema af op het specifieke doel: '+f.specdoel:''}
 
 Antwoord ALLEEN als JSON zonder markdown. BELANGRIJK: gebruik GEEN apostrofs (') in de tekst, schrijf voluit (je kan -> jij kan). Gebruik geen speciale aanhalingstekens.
 {"samenvatting":"2-3 zinnen","weekschema":[{"dag":"Maandag","type":"Kracht","titel":"korte titel","duur":"45 min","inhoud":["oefening met uitleg voor beginners of RPE voor lopers"],"intensiteit":"Matig"}],"tips":["tip1","tip2","tip3","tip bij gemiste sessie","coaching hint"],"progressie":"hoe aanpassen in week 2-3"}`;
@@ -659,9 +661,11 @@ Generate a personalised weekly training plan (week 1) based on:
 CRITICAL RULES:
 1. RUNNING: ALWAYS use time (minutes), NEVER distance or heart rate. Use RPE 1-10. Describe how each run should FEEL.
 2. LANGUAGE: ${isBeg?'Beginner — use plain terms (squat, push-up, easy jog). NO jargon like LT1, axial load, VO2max.':isLoopBeg?'Running beginner: simple run terms. Strength can be more technical.':isKrachtBeg?'Strength beginner: simple strength terms. Running can be more technical.':'Advanced — technical terms are fine (LT1, RPE, RDL, etc.)'}
-3. REST DAYS: always describe what they can do on rest days (walk, stretch, foam roll...)
-4. TIPS: tips 1-3 are coaching tips. Tip 4 = what to do if you miss a session. Tip 5 = gentle hint that a personal coach helps with technique and progression — friendly, not pushy.
-5. PROGRESSION: add a "progressie" field with 2-3 sentences on how to adapt this plan in weeks 2-3.${f.specdoel?'\n6. Align the plan with the specific goal: '+f.specdoel:''}
+3. STRENGTH: every strength session is ALWAYS full body. No splits (no push/pull/legs, no upper/lower). Distribute volume to hit at least 10-12 sets per major muscle group per week (chest, back, shoulders, quads, hamstrings, glutes). For beginners: 8-10 sets/muscle/week. For advanced: 12-16 sets/muscle/week. Use compound exercises as the base (squat, deadlift, bench press, rows, overhead press) and add accessory work.
+4. EXERCISE NAMES: use internationally recognized names. Do not awkwardly translate. Correct: squat, bench press, deadlift, Romanian deadlift, lat pulldown, hip thrust, plank.
+5. REST DAYS: always describe what they can do on rest days (walk, stretch, foam roll...)
+6. TIPS: tips 1-3 are coaching tips. Tip 4 = what to do if you miss a session. Tip 5 = gentle hint that a personal coach helps with technique and progression — friendly, not pushy.
+7. PROGRESSION: add a "progressie" field with 2-3 sentences on how to adapt this plan in weeks 2-3.${f.specdoel?'\n8. Align the plan with the specific goal: '+f.specdoel:''}
 
 Reply ONLY as JSON without markdown, use English day names. IMPORTANT: do NOT use apostrophes (') in any text values, write in full (you can -> you can, don't -> do not). No special quote characters.
 {"samenvatting":"2-3 sentences","weekschema":[{"dag":"Monday","type":"Strength","titel":"short title","duur":"45 min","inhoud":["exercise with beginner cue or RPE for runners"],"intensiteit":"Moderate"}],"tips":["tip1","tip2","tip3","missed session tip","coaching hint"],"progressie":"how to adapt in weeks 2-3"}`;
