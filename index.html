@@ -774,7 +774,7 @@ async function genereer(){
       })
     });
     const data=await res.json();
-    if(data.error){throw new Error('API fout: '+data.error.message);}
+    if(data.error){throw new Error('API fout: '+(data.error.message||data.error));}
     // Check of response afgekapt is
     if(data.stop_reason==='max_tokens'){
       console.error('Response afgekapt door max_tokens');
