@@ -1049,7 +1049,7 @@ function openContact(){
   // Update modal language
   var isNl=lang==='nl';
   document.getElementById('modal-title').textContent=isNl?'Contacteer Dries':'Contact Dries';
-  document.getElementById('modal-sub').textContent=isNl?'Stel je vraag of vertel me over je doelen — ik reageer binnen 24 uur.':'Ask your question or tell me about your goals — I will respond within 24 hours.';
+  document.getElementById('modal-sub').textContent=isNl?'Stel je vraag of vertel me over je doelen — ik reageer binnen 24 uur.':'Ask your question or tell me about your goals ����� I will respond within 24 hours.';
   document.getElementById('modal-lbl-name').textContent=isNl?'Naam':'Name';
   document.getElementById('modal-lbl-email').textContent='E-mail';
   document.getElementById('modal-lbl-msg').textContent=isNl?'Bericht':'Message';
@@ -1123,5 +1123,9 @@ function sendContact(){
     </div>
   </div>
 </div>
+<script type="module">
+  import { inject } from '/analytics.js';
+  inject();
+</script>
 </body>
 </html>
