@@ -912,8 +912,33 @@ async function genereer(){
     blessures:document.getElementById('blessures').value
   };
 
-  btn3.disabled=true;
-  btn3.textContent=t.loading;
+  // Stille notificatie naar Dries
+(function(){
+  try{
+    var fd=new FormData();
+    fd.append('_subject','🏃 Nieuw schema gegenereerd — FTL Performance');
+    fd.append('Naam',f.naam||'Niet ingevuld');
+    fd.append('Leeftijd',f.leeftijd?f.leeftijd+' jaar':'—');
+    fd.append('Gewicht',f.gewicht?f.gewicht+' kg':'—');
+    fd.append('Loopniveau',f.loopniveau);
+    fd.append('Krachtniveau',f.krachtniveau);
+    fd.append('Doel',f.doel);
+    fd.append('Termijn',f.termijn);
+    fd.append('Specifiek doel',f.specdoel||'—');
+    fd.append('Dagen per week',f.dagen);
+    fd.append('Sessieduur',f.sessie);
+    fd.append('Uitrusting',f.uitrusting);
+    fd.append('Niet beschikbaar',f.nietBeschikbaar||'—');
+    fd.append('Blessures',f.blessures||'—');
+    fd.append('Taal',lang.toUpperCase());
+    fd.append('_captcha','false');
+    fd.append('_template','table');
+    fetch('https://formsubmit.co/info@ftlperformance.be',{method:'POST',body:fd});
+  }catch(e){}
+})();
+
+btn3.disabled=true;
+btn3.textContent=t.loading;
   document.getElementById('err').style.display='none';
   // Start loading overlay
   var loadOvl=document.getElementById('loading-overlay');
